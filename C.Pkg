@@ -3,4 +3,4 @@ package,C,v1.0.20210413
 from,github.com/io-core,whenever
 license,MIT,CP
 doc,suplib, compile C programs.
-p,C.Mod,
+p,CXP.Mod,
