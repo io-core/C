@@ -1206,6 +1206,72 @@ expression0 is assigned to the procedure variable `expression` to allow the forw
 
   (* begin-procedure-description
 ---
+**Prep** locates the source code to a module, initializes the scanner, and begins parsing at 'Module'.
+  end-procedure-description *)
+  PROCEDURE Prep;
+  BEGIN
+          OXB.Init(ccWordsize);
+
+          (*initialize universe with data types and in-line procedures;
+            INTEGER and LONGINT are register size in 32 and 64 bit systems.
+            REAL and LONGREAL resgister size in 32 and 64 bit systems.
+            LED, ADC, SBC; LDPSR, LDREG, REG, COND are not in language definition*)
+
+          OXB.Enter("UML",    OXB.SFunc, OXB.intType, 132);  (*functions*)
+          OXB.Enter("SBC",    OXB.SFunc, OXB.intType, 122);
+          OXB.Enter("ADC",    OXB.SFunc, OXB.intType, 112);
+          OXB.Enter("ROR",    OXB.SFunc, OXB.intType, 92);
+          OXB.Enter("ASR",    OXB.SFunc, OXB.intType, 82);
+          OXB.Enter("LSL",    OXB.SFunc, OXB.intType, 72);
+          OXB.Enter("LEN",    OXB.SFunc, OXB.intType, 61);
+          OXB.Enter("CHR",    OXB.SFunc, OXB.charType, 51);
+          OXB.Enter("ORD",    OXB.SFunc, OXB.intType, 41);
+          OXB.Enter("FLT",    OXB.SFunc, OXB.realType, 31);
+          OXB.Enter("FLOOR",  OXB.SFunc, OXB.intType, 21);
+          OXB.Enter("ODD",    OXB.SFunc, OXB.boolType, 11);
+          OXB.Enter("ABS",    OXB.SFunc, OXB.intType, 1);
+          OXB.Enter("LED",    OXB.SProc, OXB.noType, 81);  (*procedures*)
+          OXB.Enter("UNPK",   OXB.SProc, OXB.noType, 72);
+          OXB.Enter("PACK",   OXB.SProc, OXB.noType, 62);
+          OXB.Enter("NEW",    OXB.SProc, OXB.noType, 51);
+          OXB.Enter("ASSERT", OXB.SProc, OXB.noType, 41);
+          OXB.Enter("EXCL",   OXB.SProc, OXB.noType, 32);
+          OXB.Enter("INCL",   OXB.SProc, OXB.noType, 22);
+          OXB.Enter("DEC",    OXB.SProc, OXB.noType, 11);
+          OXB.Enter("INC",    OXB.SProc, OXB.noType, 1);
+          OXB.Enter("SET",    OXB.Typ,   OXB.setType, 0);   (*types*)
+          OXB.Enter("BOOLEAN",OXB.Typ,   OXB.boolType, 0);
+          OXB.Enter("BYTE",   OXB.Typ,   OXB.byteType, 0);
+          OXB.Enter("CHAR",   OXB.Typ,   OXB.charType, 0);
+          IF ccWordsize = 4 THEN OXB.Enter("LONGREAL", OXB.Typ, OXB.realType, 0) END;
+          IF ccWordsize = 8 THEN OXB.Enter("LONGREAL", OXB.Typ, OXB.doubleType, 0) END;
+                OXB.Enter("REAL",   OXB.Typ,   OXB.realType, 0);
+          IF ccWordsize = 4 THEN OXB.Enter("LONGINT",  OXB.Typ, OXB.intType, 0) END;
+          IF ccWordsize = 8 THEN OXB.Enter("LONGINT",  OXB.Typ, OXB.longType, 0) END;
+                OXB.Enter("INTEGER",OXB.Typ,   OXB.intType, 0);
+          IF ccWordsize = 8 THEN OXB.Enter("SHORTINT", OXB.Typ, OXB.shortType, 0) END;
+
+          OXB.PrepSYSTEM;
+
+          OXB.Enter("H",     OXB.SFunc, OXB.intType, 201);     (*functions*)
+          OXB.Enter("COND",  OXB.SFunc, OXB.boolType, 191);
+          OXB.Enter("SIZE",  OXB.SFunc, OXB.intType, 181);
+          OXB.Enter("ADR",   OXB.SFunc, OXB.intType, 171);
+          OXB.Enter("VAL",   OXB.SFunc, OXB.intType, 162);
+          OXB.Enter("REG",   OXB.SFunc, OXB.intType, 151);
+          OXB.Enter("BIT",   OXB.SFunc, OXB.boolType, 142);
+          OXB.Enter("REGREG",OXB.SProc, OXB.noType, 212);  (*procedures*)
+          OXB.Enter("LDREG", OXB.SProc, OXB.noType, 142);
+          OXB.Enter("LDPSR", OXB.SProc, OXB.noType, 131);
+          OXB.Enter("COPY",  OXB.SProc, OXB.noType, 123);
+          OXB.Enter("PUT",   OXB.SProc, OXB.noType, 112);
+          OXB.Enter("GET",   OXB.SProc, OXB.noType, 102);
+  END Prep;
+
+
+
+  (* begin-procedure-description
+---
 **Compile** locates the source code to a module, initializes the scanner, and begins parsing at 'Module'.
   end-procedure-description *)
   PROCEDURE Compile*;
@@ -1218,7 +1284,7 @@ expression0 is assigned to the procedure variable `expression` to allow the forw
       IF S.codepoint = ORD("@") THEN
         Option(S); Oberon.GetSelection(T, beg, end, time);
         IF time >= 0 THEN 
-          OXB.Init(ccWordsize);
+          Prep;
           NEW(dummy); dummy.class := OXB.Var; dummy.type := OXB.intType;
           expression := expression0; Type := Type0; FormalType := FormalType0;
           OXS.Init(T, beg, ccARCH, ccWordsize, ccStackalign); 
@@ -1231,7 +1297,7 @@ expression0 is assigned to the procedure variable `expression` to allow the forw
           IF S.class = Texts.Name THEN
             Texts.WriteString(W, S.s); NEW(T); Texts.Open(T, S.s);
             IF T.len > 0 THEN 
-              OXB.Init(ccWordsize);
+              Prep;
               NEW(dummy); dummy.class := OXB.Var; dummy.type := OXB.intType;
               expression := expression0; Type := Type0; FormalType := FormalType0;
               OXS.Init(T, 0, ccARCH, ccWordsize, ccStackalign); 
@@ -1245,7 +1311,7 @@ expression0 is assigned to the procedure variable `expression` to allow the forw
         NEW(T); Texts.Open(T, S.s);
         IF T.len > 0 THEN 
           Option(S); 
-          OXB.Init(ccWordsize);
+          Prep;
           NEW(dummy); dummy.class := OXB.Var; dummy.type := OXB.intType;
           expression := expression0; Type := Type0; FormalType := FormalType0;
           OXS.Init(T, 0, ccARCH, ccWordsize, ccStackalign); 
@@ -1282,6 +1348,7 @@ BEGIN Texts.OpenWriter(W); Texts.WriteString(W, "OX C Compiler  4.13.2021");
   OXS.EnterKW(OXS.notasymbol, "",9);
   OXS.SetCommentStyle(OXS.cstyle);
   OXS.SetSigCR(FALSE);
+  OXS.SetSemiCR(FALSE);
 
 
 (*  NEW(dummy); dummy.class := OXB.Var; dummy.type := OXB.intType;
