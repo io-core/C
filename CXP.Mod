@@ -1349,6 +1349,7 @@ BEGIN Texts.OpenWriter(W); Texts.WriteString(W, "OX C Compiler  4.13.2021");
   OXS.SetCommentStyle(OXS.cstyle);
   OXS.SetSigCR(FALSE);
   OXS.SetSemiCR(FALSE);
+  OXS.SetRunes(FALSE);
 
 
 (*  NEW(dummy); dummy.class := OXB.Var; dummy.type := OXB.intType;
